@@ -50,14 +50,16 @@ class DTOSerializer {
 
 	public static function deserializeXML($XML) {
 		if($XML->documentElement) {
-			$name = $XML->documentElement->nodeName;
+			$doc = $XML->documentElement;
 		}
 		else {
-			$name = $XML->nodeName;
+			$doc = $XML;
 		}
+		$name = $doc->nodeName;
+
 		$DTO = new $name();
 
-		foreach($XML->documentElement->childNodes as $xmlChild) {
+		foreach($doc->childNodes as $xmlChild) {
 			$prop = $xmlChild->tagName;
 			if($xmlChild->childNodes->length > 1) {
 				$DTO->$prop = self::deserializeXML($xmlChild);
