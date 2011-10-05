@@ -28,7 +28,15 @@ class DTOSerializer {
 		$dom->appendChild($rootElement);
 
 		foreach($DTO as $key => $value) {
-			if(is_object($value)) {
+			if(is_array($value)) {
+				$element = $dom->createElement($key);
+				foreach($value as $k => $childDoc) {
+					$childDoc = self::serializeXML($childDoc[0]);
+					$childElement = $dom->importNode($childDoc->documentElement, true);
+					$element->appendChild($childElement);
+				}
+			}
+			else if(is_object($value)) {
 				$childDoc = self::serializeXML($value);
 				$element = $dom->importNode($childDoc->documentElement, true);
 			}
@@ -54,13 +62,19 @@ class DTOSerializer {
 
 		foreach($XML->childNodes as $xmlChild) {
 			$prop = $xmlChild->tagName;
-			if($xmlChild->childNodes->length > 1) {
+			if (is_array($DTO->$prop)) {
+				foreach($xmlChild->childNodes as $childNode) {
+					array_push($DTO->$prop, self::deserializeXML($childNode));
+				}
+			}
+			else if($xmlChild->childNodes->length > 1) {
 				$DTO->$prop = self::deserializeXML($xmlChild);
 			}
 			else {
-				$DTO->$prop = $xmlChild->textContent;
+				 $DTO->$prop = $xmlChild->textContent;
 			}
 		}
+		
 		return $DTO;
 	}
 }
